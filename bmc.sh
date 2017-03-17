@@ -34,7 +34,7 @@ bmcinfo() {
         echo -e "BMC information:"
         echo -e "  IP address: $( ip -4 addr list eth0 | grep inet | awk '{ print $2 }' )"
         echo -e "  Hostname: $( hostname )"
-        echo -e "  BMC temperature: $( /opt/vc/bin/vcgencmd measure_temp | awk -F'=' '{ print $2 }' )"
+        echo -e "  BMC temperature: $( sudo /opt/vc/bin/vcgencmd measure_temp | awk -F'=' '{ print $2 }' )"
 }
 sethostname() {
         echo -n "Enter new hostname: "
