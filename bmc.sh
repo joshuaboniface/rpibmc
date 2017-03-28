@@ -64,8 +64,8 @@ resetsw() {
         echo -n "Pressing reset switch... "
         gpio mode 0 out
         gpio write 0 1
-        gpio write 0 0
         sleep 1
+        gpio write 0 0
         echo "done."
 }
 powersw() {
