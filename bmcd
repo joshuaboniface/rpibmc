@@ -1,0 +1,70 @@
+#!/usr/bin/python
+
+import socket, os, time, struct
+from threading import Thread
+from daemon import runner
+#import RPi.GPIO as GPIO
+
+gpio_state = '11'
+gpio_psw = '12'
+gpio_rsw = '13'
+gpio_pled = '15'
+
+bmcd_state = '/run/bmcd/bmcd.state'
+bmcd_cmd = '/run/bmcd/bmcd.cmd'
+pidfile = '/run/bmcd/bmcd.pid'
+
+class readcmd(Thread):
+    def run(self):
+        while True:
+            print "Hi"
+            line = fcmd.readline()
+            print line
+            line = ""
+            time.sleep(1)
+
+class writestate(Thread):
+    def run(self):
+        while True:
+            print "Derp"
+            fstate.write("Writing state\n")   # Write str length and str
+            time.sleep(1)
+       
+
+class App():
+    def __init__(self):
+        self.stdin_path = '/dev/null'
+        self.stdout_path = '/dev/tty'
+        self.stderr_path = '/dev/tty'
+        self.pidfile_path = pidfile
+        self.pidfile_timeout = 5
+    def run(self):
+	print "Starting daemon."
+        if not os.path.exists(bmcd_state):
+	    os.mkfifo(bmcd_state) 
+        if not os.path.exists(bmcd_cmd):
+	    os.mkfifo(bmcd_cmd)
+
+        fstate = open(bmcd_state, 'w+b', 0)
+        fcmd = open(bmcd_cmd, 'r+b', 0)
+
+#        thread.start_new_thread(readcmd(fcmd))
+#        thread.start_new_thread(writestate(fstate))
+        wthread = Thread(target=writestate(fstate))
+        rthread = Thread(target=readcmd(fcmd))
+        wthread.daemon = True
+        rthread.daemon = True
+        wthread.start()
+        rthread.start()
+
+#        GPIO.setmode(GPIO.BOARD)
+#        GPIO.setup(gpio_state, GPIO.OUT)
+#        GPIO.setup(gpio_psw, GPIO.OUT)
+#        GPIO.setup(gpio_rsw, GPIO.IN)
+#        GPIO.setup(gpio_pled, GPIO.OUT)
+
+
+app = App()
+daemon_runner = runner.DaemonRunner(app)
+daemon_runner.do_action()
+
