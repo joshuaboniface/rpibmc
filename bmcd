@@ -17,34 +17,34 @@ pidfile = '/run/bmcd/bmcd.pid'
 is_pled_flashing = Event()
 
 def powerled_on():
-    GPIO.input(gpio_pled, 1)
+    GPIO.output(gpio_pled, 1)
 
 def powerled_off():
-    GPIO.input(gpio_pled, 0)
+    GPIO.output(gpio_pled, 0)
 
 def powerled_flash(is_pled_flashing):
     while is_pled_flashing.isSet():
-        GPIO.input(gpio_pled, 1)
+        GPIO.output(gpio_pled, 1)
         time.sleep(1)
-        GPIO.input(gpio_pled, 0)
+        GPIO.output(gpio_pled, 0)
         time.sleep(1)
     is_pled_flashing.clear()
     return
 
 def powersw_press():
-    GPIO.input(gpio_psw, 1)
+    GPIO.output(gpio_psw, 1)
     time.sleep(0.5)
-    GPIO.input(gpio_psw, 0)
+    GPIO.output(gpio_psw, 0)
 
 def powersw_hold():
-    GPIO.input(gpio_psw, 1)
+    GPIO.output(gpio_psw, 1)
     time.sleep(8)
-    GPIO.input(gpio_psw, 0)
+    GPIO.output(gpio_psw, 0)
 
 def resetsw_press():
-    GPIO.input(gpio_rsw, 1)
+    GPIO.output(gpio_rsw, 1)
     time.sleep(0.5)
-    GPIO.input(gpio_rsw, 0)
+    GPIO.output(gpio_rsw, 0)
 
 def locate_on():
     is_pled_flashing.set()
