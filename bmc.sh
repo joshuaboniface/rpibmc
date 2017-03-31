@@ -58,13 +58,13 @@ resetsw_press() {
 	echo "resetsw_press" > ${bmcd_cmdpipe}
 }
 powersw_press() {
-	echo "Holding power switch."
-	echo "powersw_hold" > ${bmcd_cmdpipe}
+	echo "Pressing power switch."
+	echo "powersw_press" > ${bmcd_cmdpipe}
         sleep 2
 }
 powersw_hold() {
-	echo "Pressing power switch."
-	echo "powersw_press" > ${bmcd_cmdpipe}
+	echo "Holding power switch."
+	echo "powersw_hold" > ${bmcd_cmdpipe}
         sleep 2
 }
 locate_on() {
