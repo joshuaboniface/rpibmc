@@ -81,8 +81,8 @@ def writestate(is_pled_flashing):
 class App():
     def __init__(self):
         self.stdin_path = '/dev/null'
-        self.stdout_path = '/dev/tty'
-        self.stderr_path = '/dev/tty'
+        self.stdout_path = '/var/log/bmcd.log'
+        self.stderr_path = '/var/log/bmcd.log'
         self.pidfile_path = pidfile
         self.pidfile_timeout = 5
     def run(self):
