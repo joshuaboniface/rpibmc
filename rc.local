@@ -1,0 +1,17 @@
+#!/bin/bash -e
+#
+# rc.local for RPiBMC
+exec 1>>/var/log/rc.local.log
+exec 2>>/var/log/rc.local.log
+echo "#"
+echo "# Boot at $(date) "
+echo "#"
+set -x
+screen -dmS serialconsole /dev/ttyUSB0 115200
+test -d /run/bmcd || mkdir /run/bmcd
+/home/bmc/rpibmc/bmcd start
+sleep 5
+chgrp -R gpio /run/bmcd
+chmod -R 770 /run/bmcd
+set +x
+exit 0
