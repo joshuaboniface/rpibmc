@@ -68,12 +68,7 @@ def writestate(is_pled_flashing):
     state_prev = 1
     while True:
         state_now = GPIO.input(gpio_state)
-	if state_now != state_prev:
-            fstate.write(str(state_now))
-            state_prev = state_now
-	else:
-            pass
-
+        fstate.write(str(state_now))
         if not is_pled_flashing.isSet():
             if state_now == 1:
                 powerled_on()
