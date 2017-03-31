@@ -13,6 +13,7 @@ There are three main files:
 
    Should be set as the default shell of the login user (`bmc`) and provides
    user interface to the BMC.
+   
 3) `rc.local` - The rc.local file
 
    The system `rc.local` should be replaced (or symlinked) to this file to start
