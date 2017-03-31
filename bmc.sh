@@ -114,13 +114,13 @@ case $input in
 		pgrep screen &>/dev/null || sudo screen -S serialconsole /dev/ttyUSB0 115200
                 echo
         ;;
-        'powersw')
+        'power')
                 powersw_press
                 readpower
                 echo -e "Host state: $powerstate"
                 echo
         ;;
-        'resetsw')
+        'reset')
                 resetsw_press
                 readpower
                 echo -e "Host state: $powerstate"
