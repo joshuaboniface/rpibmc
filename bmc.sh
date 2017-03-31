@@ -19,6 +19,7 @@ help() {
 	echo -e "  \e[1mhelp\e[0m - This help menu"
 	echo -e "  \e[1mbmc\e[0m - Show BMC information"
 	echo -e "  \e[1mhostname\e[0m - Set BMC hostname"
+	echo -e "  \e[1mhost\e[0m - Set host system name"
 	echo -e "  \e[1mpassword\e[0m - Set BMC password"
 	echo -e "  \e[1mshell\e[0m - Start a BMC bash shell"
 	echo -e "  \e[1mexit/logout\e[0m - Disconnect from the BMC"
@@ -30,28 +31,22 @@ bmcinfo() {
 	echo -e "  BMC temperature: $( sudo /opt/vc/bin/vcgencmd measure_temp | awk -F'=' '{ print $2 }' )"
 }
 sethostname() {
-	echo -n "Enter new hostname: "
-	read newhostname
+	newhostname="$1"
+	echo "Setting hostname to '$newhostname'."
 	sudo sed -i '/^127.0.1.1/d' /etc/hosts &>/dev/null
 	sudo tee -a /etc/hosts <<<"127.0.1.1 $newhostname" &>/dev/null
 	sudo hostname $newhostname &>/dev/null
 	sudo tee /etc/hostname <<<"$newhostname" &>/dev/null
-	echo "Hostname set to $newhostname"
+}
+sethost() {
+	newbmcname="${1}"
+	echo "Setting host system name to '${newbmcname}'."
+	sudo tee /etc/bmcname <<<"${newbmcname}" &>/dev/null
 }
 setpassword() {
-	echo -n "Enter new BMC password: "
-	read -s password_1
-	echo
-	echo -n "Reenter new BMC password: "
-	read -s password_2
-	echo
-	if [ "${password_1}" == "${password_2}" ]; then
-		echo -n "Setting BMC password... "
-		sudo chpasswd <<<"bmc:${password_1}"
-		echo "done."
-	else
-		echo "Passwords to not match!"
-	fi
+	password="$1"
+	echo "Setting BMC password."
+	sudo chpasswd <<<"bmc:${password}"
 }
 resetsw_press() {
 	echo "Pressing reset switch."
@@ -149,11 +144,33 @@ case $input in
 		echo
 	;;
 	'hostname')
-		sethostname
+		echo -n "Enter new hostname: "
+		read newhostname
+		sethostname ${newhostname}
 		echo
 	;;
+	'host')
+		echo -n "Enter new host system name: "
+		read newhost
+		sethost ${newhost}
+		echo -n "Update BMC hostname to '${newhost}-bmc'? (y/N) "
+		read updatehostnameyn
+		if [[ "${updatehostnameyn}" =~ "y" ]]; then
+			sethostname "${newhost}-bmc"
+		fi
+	;;
 	'password')
-		setpassword
+		echo -n "Enter new BMC password: "
+		read -s password_1
+		echo
+		echo -n "Reenter new BMC password: "
+		read -s password_2
+		echo
+		if [ "${password_1}" == "${password_2}" ]; then
+			setpassword "${password_1}"
+		else
+			echo "Passwords to not match!"
+		fi
 		echo
 	;;
 	'shell')
