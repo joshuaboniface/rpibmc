@@ -5,10 +5,10 @@ from threading import Thread, Event
 from daemon import runner
 import RPi.GPIO as GPIO
 
-gpio_state = 11
-gpio_psw = 12
-gpio_rsw = 13
-gpio_pled = 15
+gpio_rsw = 17
+gpio_psw = 18
+gpio_state = 27
+gpio_pled = 22
 
 bmcd_state = '/run/bmcd/bmcd.state'
 bmcd_cmd = '/run/bmcd/bmcd.cmd'
@@ -64,7 +64,6 @@ def readcmd():
             pass
 
 def writestate(is_pled_flashing):
-    state_prev = 1
     while True:
         state_now = GPIO.input(gpio_state)
     	fstate = open(bmcd_state, 'w+', 0)
@@ -92,10 +91,10 @@ class App():
         if not os.path.exists(bmcd_cmd):
 	    os.mkfifo(bmcd_cmd)
 
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(gpio_state, GPIO.OUT)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(gpio_state, GPIO.IN)
         GPIO.setup(gpio_psw, GPIO.OUT)
-        GPIO.setup(gpio_rsw, GPIO.IN)
+        GPIO.setup(gpio_rsw, GPIO.OUT)
         GPIO.setup(gpio_pled, GPIO.OUT)
 
         t1 = Thread(target=readcmd)
