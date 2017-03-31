@@ -1,7 +1,9 @@
 # rpibmc
 A BMC (LOM) created with a Raspberry Pi.
 
-Allows one to build a Raspberry Pi-based BMC unit for an IPMI-less server.
+Allows one to build a Raspberry Pi-based BMC unit for an IPMI-less server. The
+Raspbian system must include the package `screen` and (via `pip) the Python
+libraries `python-daemon` and `raspberry-gpio-python` (installed by default).
 
 There are three main files:
 
