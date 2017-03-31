@@ -31,12 +31,12 @@ bmcinfo() {
 	echo -e "  BMC temperature: $( sudo /opt/vc/bin/vcgencmd measure_temp | awk -F'=' '{ print $2 }' )"
 }
 sethostname() {
-	newhostname="$1"
-	echo "Setting hostname to '$newhostname'."
+	newhostname="${1}"
+	echo "Setting hostname to '${newhostname}'."
 	sudo sed -i '/^127.0.1.1/d' /etc/hosts &>/dev/null
-	sudo tee -a /etc/hosts <<<"127.0.1.1 $newhostname" &>/dev/null
-	sudo hostname $newhostname &>/dev/null
-	sudo tee /etc/hostname <<<"$newhostname" &>/dev/null
+	sudo tee -a /etc/hosts <<<"127.0.1.1 ${newhostname}" &>/dev/null
+	sudo hostname ${newhostname} &>/dev/null
+	sudo tee /etc/hostname <<<"${newhostname}" &>/dev/null
 }
 sethost() {
 	newbmcname="${1}"
@@ -44,7 +44,7 @@ sethost() {
 	sudo tee /etc/bmcname <<<"${newbmcname}" &>/dev/null
 }
 setpassword() {
-	password="$1"
+	password="${1}"
 	echo "Setting BMC password."
 	sudo chpasswd <<<"bmc:${password}"
 }
@@ -86,7 +86,7 @@ echo -e "| Raspberry Pi BMC |"
 echo -e "--------------------"
 echo
 echo -e "Host system: \e[1m${hostsystem}\e[0m"
-echo -e "Host state: $powerstate"
+echo -e "Host state: ${powerstate}"
 echo
 help
 echo
@@ -95,10 +95,10 @@ stty eof undef
 stty intr undef
 echo -en "\e[1m\e[34m[$(hostname)]>\e[0m "
 read input
-case $input in
+case ${input} in
 	'state')
 		readpower
-		echo -e "Host state: $powerstate"
+		echo -e "Host state: ${powerstate}"
 		echo
 	;;
 	'console')
@@ -112,19 +112,17 @@ case $input in
 	'power')
 		powersw_press
 		readpower
-		echo -e "Host state: $powerstate"
+		echo -e "Host state: ${powerstate}"
 		echo
 	;;
 	'reset')
 		resetsw_press
-		readpower
-		echo -e "Host state: $powerstate"
 		echo
 	;;
 	'kill')
 		powersw_hold
 		readpower
-		echo -e "Host state: $powerstate"
+		echo -e "Host state: ${powerstate}"
 		echo
 	;;
 	'locate')
