@@ -4,25 +4,18 @@ stty eof undef
 stty intr undef
 
 hostsystem="$( cat /etc/bmchost )"
-packages=( screen wiringpi )
-pkgfail=""
-for package in ${packages[@]}; do
-        dpkg -l | grep "^ii  ${package}" &>/dev/null || pkgfail="true"
-done
-if test -n "$pkgfail"; then
-        echo -n "Installing required packages... "
-        sudo apt update &>/dev/null
-        sudo apt install -y ${packages[@]} &>/dev/null
-        echo "done."
-fi
+bmcd_cmdpipe="/run/bmcd/bmcd.cmd"
+bmcd_statepipe="/run/bmcd/bmcd.state"
 
 help() {
         echo -e "Available commands:"
         echo -e "  \e[1mstate\e[0m - Show the system power state"
         echo -e "  \e[1mconsole\e[0m - Connect to host via serial console; ^A+D to disconnect"
-        echo -e "  \e[1mpowersw\e[0m - Press power switch on host"
-        echo -e "  \e[1mresetsw\e[0m - Press reset switch on host"
+        echo -e "  \e[1mpower\e[0m - Press power switch on host"
+        echo -e "  \e[1mreset\e[0m - Press reset switch on host"
         echo -e "  \e[1mkill\e[0m - Forcibly power off host"
+        echo -e "  \e[1mlocate\e[0m - Enable locator (flash power LED)"
+        echo -e "  \e[1munlocate\e[0m - Disable locator"
         echo -e "  \e[1mhelp\e[0m - This help menu"
         echo -e "  \e[1mbmc\e[0m - Show BMC information"
         echo -e "  \e[1mhostname\e[0m - Set BMC hostname"
@@ -60,33 +53,30 @@ setpassword() {
                 echo "Passwords to not match!"
         fi
 }
-resetsw() {
-        echo -n "Pressing reset switch... "
-        gpio mode 0 out
-        gpio write 0 1
-        sleep 1
-        gpio write 0 0
-        sleep 1
-        echo "done."
+resetsw_press() {
+        echo "Pressing reset switch."
+	echo "resetsw_press" > ${bmcd_cmdpipe}
 }
-powersw() {
-        if [ "$1" == "hard" ]; then
-                delay='sleep 10'
-                echo -n "Holding power switch... "
-        else
-                delay='sleep 1'
-                echo -n "Pressing power switch... "
-        fi
-        gpio mode 1 out
-        gpio write 1 1
-        $delay
-        gpio write 1 0
+powersw_press() {
+	echo "Holding power switch."
+	echo "powersw_hold" > ${bmcd_cmdpipe}
         sleep 2
-        echo "done."
+}
+powersw_hold() {
+	echo "Pressing power switch."
+	echo "powersw_press" > ${bmcd_cmdpipe}
+        sleep 2
+}
+locate_on() {
+	echo "Enabling locator - host power LED will flash."
+	echo "locate_on" > ${bmcd_cmdpipe}
+}
+locate_off() {
+	echo "Disabling locator."
+	echo "locate_off" > ${bmcd_cmdpipe}
 }
 readpower() {
-        gpio mode 2 in
-        powerstate_raw=$(gpio read 2)
+        powerstate_raw=$(cat ${bmcd_statepipe})
         if [ "${powerstate_raw}" -eq 1 ]; then
                 powerstate="\e[32mOn\e[0m"
         else
@@ -118,26 +108,37 @@ case $input in
         ;;
         'console')
                 echo "Starting console..."
+		# Connect to screen, or start it
                 sudo screen -r serialconsole &>/dev/null || sudo screen -S serialconsole /dev/ttyUSB0 115200
+		# If the user killed screen, restart it - just in case
+		pgrep screen &>/dev/null || sudo screen -S serialconsole /dev/ttyUSB0 115200
                 echo
         ;;
         'powersw')
-                powersw soft
+                powersw_press
                 readpower
                 echo -e "Host state: $powerstate"
                 echo
         ;;
         'resetsw')
-                resetsw
+                resetsw_press
                 readpower
                 echo -e "Host state: $powerstate"
                 echo
         ;;
         'kill')
-                powersw hard
+                powersw_hold
                 readpower
                 echo -e "Host state: $powerstate"
                 echo
+	;;
+	'locate')
+		locate_on
+		echo
+	;;
+	'unlocate')
+		locate_off
+		echo	
         ;;
         'help')
                 help

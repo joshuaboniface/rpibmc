@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import socket, os, time, struct
-from threading import Thread
+from threading import Thread, Event
 from daemon import runner
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 gpio_state = '11'
 gpio_psw = '12'
@@ -14,21 +14,73 @@ bmcd_state = '/run/bmcd/bmcd.state'
 bmcd_cmd = '/run/bmcd/bmcd.cmd'
 pidfile = '/run/bmcd/bmcd.pid'
 
-class readcmd(Thread):
-    def run(self):
-        while True:
-            print "Hi"
-            line = fcmd.readline()
-            print line
-            line = ""
-            time.sleep(1)
+is_pled_flashing = Event()
 
-class writestate(Thread):
-    def run(self):
-        while True:
-            print "Derp"
-            fstate.write("Writing state\n")   # Write str length and str
-            time.sleep(1)
+def powerled_on():
+    GPIO.input(gpip_pled, 1)
+
+def powerled_off():
+    GPIO.input(gpip_pled, 0)
+
+def powerled_flash(is_pled_flashing):
+    while is_pled_flashing.isSet():
+        GPIO.input(gpip_pled, 1)
+        time.sleep(1)
+        GPIO.input(gpip_pled, 0)
+        time.sleep(1)
+    is_pled_flashing.clear()
+    return
+
+def powersw_press():
+    GPIO.input(gpip_psw, 1)
+    time.sleep(0.5)
+    GPIO.input(gpio_psw, 0)
+
+def powersw_hold():
+    GPIO.input(gpip_psw, 1)
+    time.sleep(8)
+    GPIO.input(gpio_psw, 0)
+
+def resetsw_press():
+    GPIO.input(gpip_rsw, 1)
+    time.sleep(0.5)
+    GPIO.input(gpio_rsw, 0)
+
+def locate_on():
+    is_pled_flashing.set()
+    t = Thread(name='non-block', target=powerled_flash, args=(is_pled_flashing,))
+    t.start()
+
+def locate_off():
+    is_pled_flashing.clear()
+
+def readcmd():
+    fcmd = open(bmcd_cmd, 'r+b', 0)
+    while True:
+        line = fcmd.readline()
+        try:
+            globals()[line.rstrip()]()
+        except:
+            pass
+
+def writestate(is_pled_flashing):
+    fstate = open(bmcd_state, 'w+b', 0)
+    state_prev = 1
+    while True:
+        state_now = GPIO.input(gpio_state)
+	if state_now != state_prev:
+            fstate.write(str(state_now))
+            state_prev = state_now
+	else:
+            pass
+
+        if not is_pled_flashing.isSet():
+            if state_now == 1:
+                powerled_on()
+            else:
+                powerled_off()
+
+        time.sleep(1)
        
 
 class App():
@@ -39,30 +91,25 @@ class App():
         self.pidfile_path = pidfile
         self.pidfile_timeout = 5
     def run(self):
-	print "Starting daemon."
         if not os.path.exists(bmcd_state):
 	    os.mkfifo(bmcd_state) 
         if not os.path.exists(bmcd_cmd):
 	    os.mkfifo(bmcd_cmd)
 
-        fstate = open(bmcd_state, 'w+b', 0)
-        fcmd = open(bmcd_cmd, 'r+b', 0)
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(gpio_state, GPIO.OUT)
+        GPIO.setup(gpio_psw, GPIO.OUT)
+        GPIO.setup(gpio_rsw, GPIO.IN)
+        GPIO.setup(gpio_pled, GPIO.OUT)
 
-#        thread.start_new_thread(readcmd(fcmd))
-#        thread.start_new_thread(writestate(fstate))
-        wthread = Thread(target=writestate(fstate))
-        rthread = Thread(target=readcmd(fcmd))
-        wthread.daemon = True
-        rthread.daemon = True
-        wthread.start()
-        rthread.start()
-
-#        GPIO.setmode(GPIO.BOARD)
-#        GPIO.setup(gpio_state, GPIO.OUT)
-#        GPIO.setup(gpio_psw, GPIO.OUT)
-#        GPIO.setup(gpio_rsw, GPIO.IN)
-#        GPIO.setup(gpio_pled, GPIO.OUT)
-
+        t1 = Thread(target=readcmd)
+        t2 = Thread(target=writestate, args=(is_pled_flashing,))
+        t1.setDaemon(True)
+        t2.setDaemon(True)
+        t1.start()
+        t2.start()
+        while True:
+            pass
 
 app = App()
 daemon_runner = runner.DaemonRunner(app)
