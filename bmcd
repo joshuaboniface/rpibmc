@@ -55,7 +55,7 @@ def locate_off():
     is_pled_flashing.clear()
 
 def readcmd():
-    fcmd = open(bmcd_cmd, 'r+b', 0)
+    fcmd = open(bmcd_cmd, 'r+', 0)
     while True:
         line = fcmd.readline()
         try:
@@ -64,11 +64,12 @@ def readcmd():
             pass
 
 def writestate(is_pled_flashing):
-    fstate = open(bmcd_state, 'w+b', 0)
     state_prev = 1
     while True:
         state_now = GPIO.input(gpio_state)
+    	fstate = open(bmcd_state, 'w+', 0)
         fstate.write(str(state_now) + '\n')
+	fstate.close()
         if not is_pled_flashing.isSet():
             if state_now == 1:
                 powerled_on()
