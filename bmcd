@@ -5,10 +5,10 @@ from threading import Thread, Event
 from daemon import runner
 import RPi.GPIO as GPIO
 
-gpio_state = '11'
-gpio_psw = '12'
-gpio_rsw = '13'
-gpio_pled = '15'
+gpio_state = 11
+gpio_psw = 12
+gpio_rsw = 13
+gpio_pled = 15
 
 bmcd_state = '/run/bmcd/bmcd.state'
 bmcd_cmd = '/run/bmcd/bmcd.cmd'
@@ -17,32 +17,32 @@ pidfile = '/run/bmcd/bmcd.pid'
 is_pled_flashing = Event()
 
 def powerled_on():
-    GPIO.input(gpip_pled, 1)
+    GPIO.input(gpio_pled, 1)
 
 def powerled_off():
-    GPIO.input(gpip_pled, 0)
+    GPIO.input(gpio_pled, 0)
 
 def powerled_flash(is_pled_flashing):
     while is_pled_flashing.isSet():
-        GPIO.input(gpip_pled, 1)
+        GPIO.input(gpio_pled, 1)
         time.sleep(1)
-        GPIO.input(gpip_pled, 0)
+        GPIO.input(gpio_pled, 0)
         time.sleep(1)
     is_pled_flashing.clear()
     return
 
 def powersw_press():
-    GPIO.input(gpip_psw, 1)
+    GPIO.input(gpio_psw, 1)
     time.sleep(0.5)
     GPIO.input(gpio_psw, 0)
 
 def powersw_hold():
-    GPIO.input(gpip_psw, 1)
+    GPIO.input(gpio_psw, 1)
     time.sleep(8)
     GPIO.input(gpio_psw, 0)
 
 def resetsw_press():
-    GPIO.input(gpip_rsw, 1)
+    GPIO.input(gpio_rsw, 1)
     time.sleep(0.5)
     GPIO.input(gpio_rsw, 0)
 
