@@ -76,7 +76,7 @@ locate_off() {
 	echo "locate_off" > ${bmcd_cmdpipe}
 }
 readpower() {
-        powerstate_raw=$(cat ${bmcd_statepipe})
+        powerstate_raw=$(echo < ${bmcd_statepipe})
         if [ "${powerstate_raw}" -eq 1 ]; then
                 powerstate="\e[32mOn\e[0m"
         else
