@@ -7,7 +7,7 @@ echo "#"
 echo "# Boot at $(date) "
 echo "#"
 set -x
-screen -dmS serialconsole /dev/ttyUSB0 115200
+/usr/bin/screen -dmS serialconsole /dev/ttyUSB0 115200
 test -d /run/bmcd || mkdir /run/bmcd
 /home/bmc/rpibmc/bmcd start
 sleep 5
