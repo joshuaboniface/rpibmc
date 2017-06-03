@@ -131,9 +131,9 @@ while true; do
 		'console')
 			echo "Starting console..."
 			# Connect to screen, or start it
-			sudo screen -r serialconsole &>/dev/null || sudo screen -S serialconsole /dev/ttyUSB0 115200
+			sudo screen -r serialconsole &>/dev/null || sudo screen -S serialconsole /dev/ttyAMA0 115200
 			# If the user killed screen, restart it - just in case
-			pgrep screen &>/dev/null || sudo screen -S serialconsole /dev/ttyUSB0 115200
+			pgrep screen &>/dev/null || sudo screen -S serialconsole /dev/ttyAMA0 115200
 			echo
 		;;
 		'power')
