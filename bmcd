@@ -1,27 +1,47 @@
 #!/usr/bin/env python
 
+#
+# bmcd - BMC Daemon program
+#
+# This program works as a background daemon for the RPi BMC. It provides
+# functionality to interface with the GPIOs in an asynchronous way via two
+# pipes, one read-only and one write-only from the outside perspective. The read
+# pipe provides the current system power status while the write pipe listens
+# for commands.
+#
+# Part of the RPiBMC project - (c)2017 Joshua Boniface
+# This software is licenced under the terms of the GNU GPL version 3. For
+# details please see LICENSE
+#
+
 import socket, os, time, struct
 from threading import Thread, Event
 from daemon import runner
 import RPi.GPIO as GPIO
 
+# These are GPIOs 1-4
 gpio_rsw = 17
 gpio_psw = 18
 gpio_state = 27
 gpio_pled = 22
 
+# The pipes and PID file (sorry I manage this here...)
 bmcd_state = '/run/bmcd/bmcd.state'
 bmcd_cmd = '/run/bmcd/bmcd.cmd'
 pidfile = '/run/bmcd/bmcd.pid'
 
+# Event for LED flash (i.e. locator)
 is_pled_flashing = Event()
 
+# Turn the power LED on
 def powerled_on():
     GPIO.output(gpio_pled, 1)
 
+# Turn the power LED off
 def powerled_off():
     GPIO.output(gpio_pled, 0)
 
+# Flash the power LED
 def powerled_flash(is_pled_flashing):
     while is_pled_flashing.isSet():
         GPIO.output(gpio_pled, 1)
@@ -31,29 +51,35 @@ def powerled_flash(is_pled_flashing):
     is_pled_flashing.clear()
     return
 
+# Press the power button
 def powersw_press():
     GPIO.output(gpio_psw, 1)
     time.sleep(0.5)
     GPIO.output(gpio_psw, 0)
 
+# Hold the power button (8 seconds)
 def powersw_hold():
     GPIO.output(gpio_psw, 1)
     time.sleep(8)
     GPIO.output(gpio_psw, 0)
 
+# Press the reset button
 def resetsw_press():
     GPIO.output(gpio_rsw, 1)
     time.sleep(0.5)
     GPIO.output(gpio_rsw, 0)
 
+# Turn on the locator (subthread)
 def locate_on():
     is_pled_flashing.set()
     t = Thread(name='non-block', target=powerled_flash, args=(is_pled_flashing,))
     t.start()
 
+# Turn off the locator
 def locate_off():
     is_pled_flashing.clear()
 
+# Read a command from the pipe
 def readcmd():
     fcmd = open(bmcd_cmd, 'r+', 0)
     while True:
@@ -63,6 +89,7 @@ def readcmd():
         except:
             pass
 
+#  Main loop
 def writestate(is_pled_flashing):
     while True:
         state_now = GPIO.input(gpio_state)
@@ -77,7 +104,7 @@ def writestate(is_pled_flashing):
 
         time.sleep(1)
        
-
+# Main app definiton - sets default states and runs main loop
 class App():
     def __init__(self):
         self.stdin_path = '/dev/null'
@@ -106,7 +133,7 @@ class App():
         while True:
             pass
 
+# App definition - start it up
 app = App()
 daemon_runner = runner.DaemonRunner(app)
 daemon_runner.do_action()
-

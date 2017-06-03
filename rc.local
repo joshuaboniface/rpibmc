@@ -1,17 +1,48 @@
 #!/bin/bash -e
 #
-# rc.local for RPiBMC
+# rc.local - BMC startup rc.local file
+#
+# This file replaces the default rc.local (or can be appended to it) to
+# ensure the BMC daemon and serial console sesson start at boot and have
+# the proper permissions for bmc.sh to work as expected. It also writes 
+# some useful debug information to /var/log/rc.local.log should later boot
+# analysis be needed.
+#
+# Has dependencies on the 'bmcd' and 'screen' utilities.
+#
+# Part of the RPiBMC project - (c)2017 Joshua Boniface
+# This software is licenced under the terms of the GNU GPL version 3. For
+# details please see LICENSE
+#
+
+# Write all output to rc.local.log file
 exec 1>>/var/log/rc.local.log
 exec 2>>/var/log/rc.local.log
+
+# Write when we booted
 echo "#"
 echo "# Boot at $(date) "
 echo "#"
+
+# Turn on verbose BASH mode for logging visibility
 set -x
-/usr/bin/screen -dmS serialconsole /dev/ttyUSB0 115200
+
+# Start the screen session to /dev/ttyAMA0 (115200 baud)
+/usr/bin/screen -dmS serialconsole /dev/ttyAMA0 115200
+
+# Check if the temporary bmcd directory exists, or create it
 test -d /run/bmcd || mkdir /run/bmcd
+
+# Start the bmcd daemon
 /home/bmc/rpibmc/bmcd start
+
+# Wait 5 seconds for the daemon startup routines
 sleep 5
+
+# Change the temporary bmcd directory permissions to allow gpio group (only) access
 chgrp -R gpio /run/bmcd
 chmod -R 770 /run/bmcd
+
+# Turn off verbose BASH mode and exit 0 (as per rc.local requirements)
 set +x
 exit 0
