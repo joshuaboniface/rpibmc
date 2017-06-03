@@ -5,6 +5,8 @@ Allows one to build a Raspberry Pi-based BMC unit for an IPMI-less server. The
 Raspbian system must include the package `screen` and (via `pip`) the Python
 libraries `python-daemon` and `raspberry-gpio-python` (installed by default).
 
+More information can be found here: https://www.boniface.me/post/a-raspberry-pi-bmc/ 
+
 There are three main files:
 
 1) `bmcd` - BMC Daemon
