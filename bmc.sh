@@ -73,12 +73,12 @@ resetsw_press() {
 powersw_press() {
 	echo "Pressing power switch."
 	echo "powersw_press" > ${bmcd_cmdpipe}
-	sleep 2
+	sleep 2 # Wait a bit to let it sink in
 }
 powersw_hold() {
 	echo "Holding power switch."
 	echo "powersw_hold" > ${bmcd_cmdpipe}
-	sleep 2
+	sleep 2 # wait a bit to let it sink in
 }
 locate_on() {
 	echo "Enabling locator - host power LED will flash."
