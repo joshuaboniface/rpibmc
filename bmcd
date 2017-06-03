@@ -79,7 +79,7 @@ def locate_on():
 def locate_off():
     is_pled_flashing.clear()
 
-# Read a command from the pipe
+# Main loop to read a command from the pipe
 def readcmd():
     fcmd = open(bmcd_cmd, 'r+', 0)
     while True:
@@ -89,7 +89,7 @@ def readcmd():
         except:
             pass
 
-#  Main loop
+#  Main loop to write power state to the pipe
 def writestate(is_pled_flashing):
     while True:
         state_now = GPIO.input(gpio_state)
