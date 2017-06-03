@@ -7,7 +7,7 @@
 # command-line interface for interfacing with the running bmcd daemon
 # program as well as a few distinct functions such as a serial console, as
 # well as managing the BMC itself (e.g. BMC hostname, IP address, or host
-# system name. It is designed to be started automatically on login to the
+# system name). It is designed to be started automatically on login to the
 # BMC as the 'bmc' user, e.g. with the following passwd file entry:
 #   bmc:x:2000:2000:BMC:/home/dir:/path/to/bmc.sh
 #
