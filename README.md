@@ -1,4 +1,4 @@
-# rpibmc
+# RPiBMC
 A BMC (LOM) created with a Raspberry Pi.
 
 Allows one to build a Raspberry Pi-based BMC unit for an IPMI-less server. The
