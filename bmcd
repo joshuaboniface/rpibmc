@@ -131,7 +131,22 @@ class App():
         t2.start()
         Event().wait()
 
+class PatchedRunner(runner.DaemonRunner):
+    def _open_streams_from_app_stream_paths(self, app):
+        """ Open the `daemon_context` streams from the paths specified.
+
+            :param app: The application instance.
+
+            Open the `daemon_context` standard streams (`stdin`,
+            `stdout`, `stderr`) as stream objects of the appropriate
+            types, from each of the corresponding filesystem paths
+            from the `app`.
+            """
+        self.daemon_context.stdin = open(app.stdin_path, 'rt')
+        self.daemon_context.stdout = open(app.stdout_path, 'w+t')
+        self.daemon_context.stderr = open(app.stderr_path, 'w+t')
+
 # App definition - start it up
 app = App()
-daemon_runner = runner.DaemonRunner(app)
+daemon_runner = PatchedRunner(app)
 daemon_runner.do_action()
