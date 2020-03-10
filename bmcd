@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #
 # bmcd - BMC Daemon program
@@ -81,7 +81,7 @@ def locate_off():
 
 # Main loop to read a command from the pipe
 def readcmd():
-    fcmd = open(bmcd_cmd, 'r+', 0)
+    fcmd = open(bmcd_cmd, 'rb+', 0)
     while True:
         line = fcmd.readline()
         try:
@@ -93,17 +93,16 @@ def readcmd():
 def writestate(is_pled_flashing):
     while True:
         state_now = GPIO.input(gpio_state)
-    	fstate = open(bmcd_state, 'w+', 0)
+        fstate = open(bmcd_state, 'w')
         fstate.write(str(state_now) + '\n')
-	fstate.close()
+        fstate.close()
         if not is_pled_flashing.isSet():
             if state_now == 1:
                 powerled_on()
             else:
                 powerled_off()
-
         time.sleep(1)
-       
+
 # Main app definiton - sets default states and runs main loop
 class App():
     def __init__(self):
@@ -114,9 +113,9 @@ class App():
         self.pidfile_timeout = 5
     def run(self):
         if not os.path.exists(bmcd_state):
-	    os.mkfifo(bmcd_state) 
+            os.mkfifo(bmcd_state)
         if not os.path.exists(bmcd_cmd):
-	    os.mkfifo(bmcd_cmd)
+            os.mkfifo(bmcd_cmd)
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(gpio_state, GPIO.IN)
