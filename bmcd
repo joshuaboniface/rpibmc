@@ -119,9 +119,9 @@ class App():
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(gpio_state, GPIO.IN)
-        GPIO.setup(gpio_psw, GPIO.OUT)
-        GPIO.setup(gpio_rsw, GPIO.OUT)
-        GPIO.setup(gpio_pled, GPIO.OUT)
+        GPIO.setup(gpio_psw, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(gpio_rsw, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(gpio_pled, GPIO.OUT, initial=GPIO.LOW)
 
         t1 = Thread(target=readcmd)
         t2 = Thread(target=writestate, args=(is_pled_flashing,))
