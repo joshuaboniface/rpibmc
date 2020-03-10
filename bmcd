@@ -129,8 +129,7 @@ class App():
         t2.setDaemon(True)
         t1.start()
         t2.start()
-        while True:
-            pass
+        Event().wait()
 
 # App definition - start it up
 app = App()
