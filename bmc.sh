@@ -4,16 +4,18 @@
 # bmc.sh - BMC command shell
 #
 # This program works as the main user shell for the RPi BMC. It provides a
-# command-line interface for interfacing with the running bmcd daemon
-# program as well as a few distinct functions such as a serial console, as
+# command-line interface for interfacing with the GPIOs used for the BMC
+# as well as a few distinct functions such as a serial console, as
 # well as managing the BMC itself (e.g. BMC hostname, IP address, or host
 # system name). It is designed to be started automatically on login to the
-# BMC as the 'bmc' user, e.g. with the following passwd file entry:
+# BMC as a 'bmc' user, e.g. with the following passwd and group file entries:
 #   bmc:x:2000:2000:BMC:/home/dir:/path/to/bmc.sh
+#   gpio:x:997:other_user1,other_user2,bmc
 #
-# Has dependencies on the 'bmcd' and 'screen' utilities.
+# Has dependencies on the 'screen' utility.
 #
-# Part of the RPiBMC project - (c)2017 Joshua Boniface
+# Copyright (c) 2020  Jonas Malaco
+# Adapted from the RPiBMC project - (c)2017 Joshua Boniface
 # This software is licenced under the terms of the GNU GPL version 3. For
 # details please see LICENSE
 #
@@ -21,9 +23,29 @@
 stty eof undef
 stty intr undef
 
+gpio_rsw=17
+gpio_psw=18
+gpio_state=27
+
+gpio_setup() {
+	for gpio in "${gpio_rsw}" "${gpio_psw}" ; do
+		echo "${gpio}" >"/sys/class/gpio/export"
+		echo "out" >"/sys/class/gpio/gpio${gpio}/direction"
+	done
+	for gpio in "${gpio_state}"; do
+		echo "${gpio}" >"/sys/class/gpio/export"
+		echo "in" >"/sys/class/gpio/gpio${gpio}/direction"
+	done
+}
+gpio_press() {
+	gpio="${1}"
+	seconds="${2}"
+	echo 1>"/sys/class/gpio/gpio${gpio}/value"
+	sleep "${seconds}"
+	echo 0>"/sys/class/gpio/gpio${gpio}/value"
+}
+
 hostsystem="$( cat /etc/bmchost )"
-bmcd_cmdpipe="/run/bmcd/bmcd.cmd"
-bmcd_statepipe="/run/bmcd/bmcd.state"
 
 help() {
 	echo -e "Available commands:"
@@ -32,8 +54,8 @@ help() {
 	echo -e "  \e[1mpower\e[0m - Press power switch on host"
 	echo -e "  \e[1mreset\e[0m - Press reset switch on host"
 	echo -e "  \e[1mkill\e[0m - Forcibly power off host"
-	echo -e "  \e[1mlocate\e[0m - Enable locator (flash power LED)"
-	echo -e "  \e[1munlocate\e[0m - Disable locator"
+	# TODO echo -e "  \e[1mlocate\e[0m - Enable locator (flash power LED)"
+	# TODO echo -e "  \e[1munlocate\e[0m - Disable locator"
 	echo -e "  \e[1mhelp\e[0m - This help menu"
 	echo -e "  \e[1mbmc\e[0m - Show BMC information"
 	echo -e "  \e[1mhostname\e[0m - Set BMC hostname"
@@ -68,34 +90,37 @@ setpassword() {
 }
 resetsw_press() {
 	echo "Pressing reset switch."
-	echo "resetsw_press" > ${bmcd_cmdpipe}
+	gpio_press "${gpio_rsw}" 0.5
 }
 powersw_press() {
 	echo "Pressing power switch."
-	echo "powersw_press" > ${bmcd_cmdpipe}
+	gpio_press "${gpio_psw}" 0.5
 	sleep 2 # Wait a bit to let it sink in
 }
 powersw_hold() {
 	echo "Holding power switch."
-	echo "powersw_hold" > ${bmcd_cmdpipe}
+	gpio_press "${gpio_psw}" 8
 	sleep 2 # wait a bit to let it sink in
 }
 locate_on() {
 	echo "Enabling locator - host power LED will flash."
-	echo "locate_on" > ${bmcd_cmdpipe}
+	echo "Not implemented"
 }
 locate_off() {
 	echo "Disabling locator."
-	echo "locate_off" > ${bmcd_cmdpipe}
+	echo "Not implemented"
 }
 readpower() {
-	powerstate_raw=$(cat ${bmcd_statepipe})
+	powerstate_raw=$(cat "/sys/class/gpio/gpio${gpio_state}/value")
 	if [[ "${powerstate_raw}" -eq 1 ]]; then
 		powerstate="\e[32mOn\e[0m"
 	else
 		powerstate="\e[31mOff\e[0m"
 	fi
 }
+
+# export and configure GPIOs
+gpio_setup
 
 # Read the power state
 readpower
