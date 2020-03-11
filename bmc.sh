@@ -4,20 +4,25 @@
 # bmc.sh - BMC command shell
 #
 # This program works as the main user shell for the RPi BMC. It provides a
-# command-line interface for interfacing with the GPIOs used for the BMC
-# as well as a few distinct functions such as a serial console, as
-# well as managing the BMC itself (e.g. BMC hostname, IP address, or host
-# system name). It is designed to be started automatically on login to the
-# BMC as a 'bmc' user, e.g. with the following passwd and group file entries:
+# command-line interface for interfacing with the GPIOs used for the BMC, a few
+# distinct functions such as a serial console, as well as managing the BMC
+# itself (e.g. BMC hostname, IP address, or host system name).
+#
+# It is designed so it can be started automatically on login to the BMC.  For
+# example, as a 'bmc' user with the following passwd file entry:
+#
 #   bmc:x:2000:2000:BMC:/home/dir:/path/to/bmc.sh
-#   gpio:x:997:other_user1,other_user2,bmc
 #
-# Has dependencies on the 'screen' utility.
+# Has dependencies on the 'screen' utility.  The user must also be part of the
+# 'gpio' group, and should be able to use 'sudo'.
 #
-# Copyright (c) 2020  Jonas Malaco
-# Adapted from the RPiBMC project - (c)2017 Joshua Boniface
+# Adapted from the RPiBMC project.
+#
+# The RPiBMC project
+# Copyright (c) 2017  Joshua Boniface
+#
 # This software is licenced under the terms of the GNU GPL version 3. For
-# details please see LICENSE
+# details please see LICENSE.
 #
 
 stty eof undef

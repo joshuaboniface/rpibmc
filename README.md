@@ -20,4 +20,4 @@ The BMC shell is entirely contained in `bmc.sh`, and provides a text-based
 interface to the BMC.
 
 It can be set as the default shell of the login user, or directly invoked.  The
-user must be made part of the `gpio` group and should have access to `sudo`.
+user must be made part of the `gpio` group and should be able to use `sudo`.
