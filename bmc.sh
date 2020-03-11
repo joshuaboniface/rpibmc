@@ -40,9 +40,9 @@ gpio_setup() {
 gpio_press() {
 	gpio="${1}"
 	seconds="${2}"
-	echo 1>"/sys/class/gpio/gpio${gpio}/value"
+	echo 1 >"/sys/class/gpio/gpio${gpio}/value"
 	sleep "${seconds}"
-	echo 0>"/sys/class/gpio/gpio${gpio}/value"
+	echo 0 >"/sys/class/gpio/gpio${gpio}/value"
 }
 
 hostsystem="$( cat /etc/bmchost )"
