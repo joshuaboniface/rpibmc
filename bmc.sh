@@ -33,13 +33,19 @@ gpio_psw=18
 gpio_state=27
 
 gpio_setup() {
-	for gpio in "${gpio_rsw}" "${gpio_psw}" ; do
-		echo "${gpio}" >"/sys/class/gpio/export"
-		echo "out" >"/sys/class/gpio/gpio${gpio}/direction"
-	done
-	for gpio in "${gpio_state}"; do
-		echo "${gpio}" >"/sys/class/gpio/export"
-		echo "in" >"/sys/class/gpio/gpio${gpio}/direction"
+	for dir in "out" "in"; do
+		if [[ "${dir}" == "out" ]]; then
+			gpios=("${gpio_rsw}" "${gpio_psw}")
+		else
+			gpios=("${gpio_state}")
+		fi
+		for gpio in "${gpios[@]}"; do
+			if [[ ! -d "/sys/class/gpio/gpio${gpio}" ]]; then
+				echo "${gpio}" >"/sys/class/gpio/export"
+				sleep 0.1
+			fi
+			echo "${dir}" >"/sys/class/gpio/gpio${gpio}/direction"
+		done
 	done
 }
 gpio_press() {
