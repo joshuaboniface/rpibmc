@@ -1,4 +1,11 @@
 # RPiBMC
+
+ARCHIVED: I no longer use this project, having never gotten the RS232 serial portion to work right, and then replacing the old BMC-less server motherboards I created this for with IPMI-capable ones back in 2019. As I no longer have any need or interest in this project, please consider it obsolete.
+
+If you're looking for a modern replacement, check out https://www.pikvm.org/ which does all the things I wanted this to do, far far better than I could.
+
+---
+
 A BMC (LOM) created with a Raspberry Pi.
 
 Allows one to build a Raspberry Pi-based BMC unit for an IPMI-less server. The
